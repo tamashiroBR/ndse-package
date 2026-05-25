@@ -182,6 +182,164 @@ $output = json_decode($result, true);
 
 ---
 
+### Math Utilities
+
+The math classes can also be used independently for general power system calculations.
+
+#### Angle Conversions
+
+```php
+use NDSE\Math\Angle;
+
+$deg = new Angle(30, 'deg');
+echo $deg->rad();   // 0.5236 (radians)
+
+$rad = new Angle(M_PI / 4, 'rad');
+echo $rad->deg();   // 45.0 (degrees)
+```
+
+#### Complex Number Arithmetic
+
+```php
+use NDSE\Math\Angle;
+use NDSE\Math\Complex;
+
+// Rectangular form: Z = a + jb
+$z1 = new Complex(3, 4);    // Z1 = 3 + j4
+$z2 = new Complex(1, -2);   // Z2 = 1 - j2
+
+echo $z1->abs();             // 5.0      (modulus |Z1|)
+echo $z1->ang();             // 0.9273   (angle in radians; use rad2deg() to convert)
+
+$sum  = $z1->add($z2);       // 4 + j2
+$diff = $z1->sub($z2);       // 2 + j6
+$prod = $z1->multiply($z2);  // 11 - j2
+$quot = $z1->div($z2);       // -1 + j2
+$conj = $z1->conj();         // 3 - j4  (conjugate)
+$inv  = $z1->inv();          // 0.12 - j0.16  (inverse 1/Z1)
+$neg  = $z1->neg();          // -3 - j4  (negation)
+
+// Polar form: Z = |Z| ∠θ  (pass an Angle object as second argument)
+$z_polar = new Complex(5, new Angle(53.13, 'deg'));  // 5∠53.13° ≈ 3 + j4
+echo $z_polar->re;   // ≈ 3.0
+echo $z_polar->img;  // ≈ 4.0
+
+// Power engineering: transmission line impedance and admittance
+$Z = new Complex(0.02, 0.08);   // Z = R + jX (pu)
+$Y = $Z->inv();                  // Y = G + jB (pu)
+
+// Apparent power: S = V × I*
+$V = new Complex(1.0, 0.0);     // Voltage 1.0∠0° pu
+$I = new Complex(0.8, -0.6);    // Current (lagging load)
+$S = $V->multiply($I->conj());  // S = P + jQ
+echo $S->re;   // 0.8 (active power, pu)
+echo $S->img;  // 0.6 (reactive power, pu)
+```
+
+#### Dense Matrix Operations
+
+```php
+use NDSE\Math\Matrix;
+
+$A = new Matrix([
+    [2, 1, 0],
+    [1, 3, 1],
+    [0, 1, 2],
+]);
+
+$B = new Matrix([[1,0,1],[0,2,0],[1,0,1]]);
+
+$C  = $A->add($B);         // A + B
+$D  = $A->multiply($B);    // A × B  (matrix product)
+$E  = $A->multiply(2);     // 2 × A  (scalar product)
+$At = $A->transpose();     // Aᵀ
+
+// Extract column 1 (0-indexed)
+$col = $A->subMatrix([], [1]);
+
+// Filter rows where column 0 > 1
+$rows = $A->subMatrix([0, '>', 1], []);
+
+// Get a specific element (row 1, col 2)
+$val = $A->get(1, 2);   // 1
+
+// Create a zero matrix
+$Z = Matrix::zeros(3, 3);
+```
+
+#### Sparse Matrix Operations
+
+```php
+use NDSE\Math\Sparse;
+use NDSE\Math\Complex;
+
+// Build a 4×4 sparse complex Y-bus matrix
+$Y = new Sparse(4, 4);
+
+// Set diagonal (self-admittance)
+$Y->set(new Complex(10, -30), 0, 0);
+$Y->set(new Complex(10, -30), 1, 1);
+$Y->set(new Complex(10, -30), 2, 2);
+$Y->set(new Complex(10, -30), 3, 3);
+
+// Set off-diagonal (mutual admittance)
+$Y->set(new Complex(-5, 15), 0, 1);
+$Y->set(new Complex(-5, 15), 1, 0);
+$Y->set(new Complex(-5, 15), 1, 2);
+$Y->set(new Complex(-5, 15), 2, 1);
+
+// Retrieve a specific element
+$y00 = $Y->get(0, 0);   // Complex(10, -30)
+
+// Convert to dense Matrix for display or further operations
+$Yfull = $Y->full();
+```
+
+#### LU Decomposition Solver
+
+The `LinAlg` class provides the sparse LU decomposition solver used internally by the
+Newton-Raphson Load Flow to solve the Jacobian system **J·Δx = r** at each iteration.
+The sparse matrix must be built via `Matrix->sparse()` (CSC format).
+
+```php
+use NDSE\Math\Matrix;
+use NDSE\Math\Complex;
+use NDSE\Math\LinAlg;
+
+// --- Real-valued system: Ax = b ---
+// 4x + 3y      = 10
+// 6x + 3y      = 12
+// 2x + 3y + 2z = 14
+// Expected: x=1, y=2, z=3
+
+$A = new Matrix([
+    [4, 3, 0],
+    [6, 3, 0],
+    [2, 3, 2],
+]);
+
+$LU = LinAlg::LUdecomp($A->sparse());
+$x  = LinAlg::LUsolver($LU, [10, 12, 14]);
+// $x = [1.0, 2.0, 3.0]
+
+// --- Complex system: Y·V = I (Y-bus network equations) ---
+// Y = | 10-j30   -5+j15 |   I = | 1+j0 |
+//     | -5+j15   10-j30 |        | 0+j0 |
+
+$Ydense = new Matrix([
+    [new Complex(10, -30), new Complex(-5,  15)],
+    [new Complex(-5,  15), new Complex(10, -30)],
+]);
+
+$LUc  = LinAlg::LUdecomp($Ydense->sparse());
+$Ivec = [new Complex(1, 0), new Complex(0, 0)];
+$Vvec = LinAlg::LUsolver($LUc, $Ivec);
+// $Vvec[0] → Complex bus voltage at node 0
+// $Vvec[1] → Complex bus voltage at node 1
+```
+
+---
+
 ## Example Files
 
 The `examples/` directory contains ready-to-run PHP scripts and JSON data files for all
@@ -189,6 +347,7 @@ standard IEEE test systems used in the doctoral thesis:
 
 | Script | System | Type |
 |---|---|---|
+| `example_math.php` | — | Math utilities (Angle, Complex, Matrix, Sparse, LinAlg) |
 | `example_loadflow_9bus.php` | IEEE 9-Bus | Load Flow (inline data) |
 | `example_loadflow_57bus.php` | IEEE 57-Bus | Load Flow (from JSON file) |
 | `example_loadflow_118bus.php` | IEEE 118-Bus | Load Flow (from JSON file) |
@@ -198,6 +357,7 @@ Run any example from the command line after installing dependencies:
 
 ```bash
 composer install
+php examples/example_math.php
 php examples/example_loadflow_9bus.php
 php examples/example_loadflow_57bus.php
 php examples/example_loadflow_118bus.php
