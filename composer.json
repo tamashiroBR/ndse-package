@@ -1,6 +1,6 @@
 {
     "name": "tamashiro/ndse",
-    "description": "NDSE - Network Dynamic Simulation Engine. A PHP package for electrical power system load flow and transient stability analysis.",
+    "description": "PHP library for electrical power system simulation: Load Flow and Transient Stability Analysis",
     "type": "library",
     "license": "GPL-2.0-or-later",
     "authors": [
