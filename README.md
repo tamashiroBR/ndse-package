@@ -395,12 +395,13 @@ examples/
 ├── loadflow_9bus.json             # IEEE 9-Bus load flow data
 ├── loadflow_57bus.json            # IEEE 57-Bus load flow data
 ├── loadflow_118bus.json           # IEEE 118-Bus load flow data
-├── example_math.php
 ├── stability_9bus.json            # IEEE 9-Bus transient stability data
 ├── example_loadflow_9bus.php      # Load flow example (inline data)
 ├── example_loadflow_57bus.php     # Load flow example (JSON file)
 ├── example_loadflow_118bus.php    # Load flow example (JSON file)
+├── example_math.php
 └── example_stability_9bus.php     # Transient stability example
+
 ```
 
 ---
