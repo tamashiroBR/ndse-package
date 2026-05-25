@@ -1,4 +1,4 @@
-# NDSE — Network Dynamic Simulation Engine
+# NDSE package
 
 [![Latest Stable Version](https://poser.pugx.org/tamashiro/ndse/v/stable)](https://packagist.org/packages/tamashiro/ndse)
 [![License](https://poser.pugx.org/tamashiro/ndse/license)](https://packagist.org/packages/tamashiro/ndse)
