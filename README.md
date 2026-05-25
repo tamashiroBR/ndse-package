@@ -1,4 +1,4 @@
-# NDSE - Network Dynamic Simulation Engine
+# NDSE package
 
 Um pacote PHP para simulação dinâmica de redes elétricas, com suporte a cálculo de fluxo de carga (Load Flow) e análise de estabilidade transitória (Transient Stability Analysis).
 
