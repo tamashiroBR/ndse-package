@@ -1,83 +1,112 @@
-# NDSE - Network Dynamic Simulation Engine
+# NDSE — Network Dynamic Simulation Engine
 
-Um pacote PHP para simulação dinâmica de redes elétricas, com suporte a cálculo de fluxo de carga (Load Flow) e análise de estabilidade transitória (Transient Stability Analysis).
+[![Latest Stable Version](https://poser.pugx.org/tamashiro/ndse/v/stable)](https://packagist.org/packages/tamashiro/ndse)
+[![License](https://poser.pugx.org/tamashiro/ndse/license)](https://packagist.org/packages/tamashiro/ndse)
+[![PHP Version Require](https://poser.pugx.org/tamashiro/ndse/require/php)](https://packagist.org/packages/tamashiro/ndse)
 
-O software é fruto de uma tese de doutorado defendida na Universidade Federal de Uberlândia, Faculdade de Engenharia Elétrica, com o documento disponível no repositório: https://repositorio.ufu.br/handle/123456789/18396.
+**NDSE** is a PHP library for electrical power system simulation. It provides a steady-state **Load Flow** solver and a time-domain **Transient Stability Analysis** engine, both built on top of native PHP sparse matrix and complex number math utilities.
 
-## Instalação
+This software is the result of a doctoral thesis defended at the Federal University of Uberlândia, Faculty of Electrical Engineering. The full thesis document is available at the university repository: https://repositorio.ufu.br/handle/123456789/18396.
 
-Você pode instalar este pacote via Composer:
+---
+
+## Requirements
+
+- PHP >= 7.4
+
+## Installation
+
+Install the package via [Composer](https://getcomposer.org):
 
 ```bash
 composer require tamashiro/ndse
 ```
 
-## Requisitos
+---
 
-- PHP >= 7.4
+## Features
 
-## Funcionalidades
+| Feature | Description |
+|---|---|
+| **Load Flow** | Newton-Raphson steady-state power flow solver with reactive power limit enforcement |
+| **Transient Analysis** | Implicit trapezoidal time-domain integration with Newton-Raphson corrector |
+| **Generator Models** | Classical (`Gen1`) and 4th-order (`Gen2`) synchronous machine models |
+| **Exciter Models** | IEEE Type I (`Exc1`) and simplified IEEE ST1-style (`Exc2`) excitation systems |
+| **Math Utilities** | Dense and sparse matrix operations, complex arithmetic, and linear algebra solvers |
 
-- **Load Flow (Fluxo de Carga)**: Cálculo de fluxo de carga em sistemas de potência utilizando o método de Newton-Raphson.
-- **Transient Analysis (Análise Transitória)**: Simulação no domínio do tempo utilizando método de integração trapezoidal implícito.
-- **Modelos de Equipamentos**: 
-  - Geradores síncronos (Gen1, Gen2)
-  - Sistemas de excitação (Exc1, Exc2)
-- **Matemática e Matrizes**: Suporte nativo para operações com matrizes densas e esparsas, bem como números complexos.
+---
 
-## Uso Básico
+## Usage
 
-### Fluxo de Carga
+### Load Flow
 
 ```php
 use NDSE\Tools\LoadFlow;
 
-// Configurar opções e dados da rede
 $data = [
-    'optLF' => [100, 20, 1e-3, 1], // sbase, max_iter, tol, qlim
-    'bus' => [...],
-    'branch' => [...]
+    'optLF'  => [100, 20, 1e-3, 1], // sbase (MVA), max_iter, tol, qlim
+    'bus'    => [...],               // bus data array
+    'branch' => [...],               // branch data array
 ];
 
-// Instanciar a ferramenta e executar
 $lf = new LoadFlow($data);
 $lf->makeYbus();
 $lf->run();
 
-// Obter resultados
 $results = $lf->getData();
 ```
 
-### Análise de Estabilidade Transitória
+### Transient Stability Analysis
 
 ```php
 use NDSE\Tools\TransientAnalysis;
 
-// Configurar opções e dados dinâmicos
 $data = [
-    'optLF' => [100, 20, 1e-3, 1],
-    'optTA' => [60, 0, 10, 0.01], // fbase, tstart, tstop, step
-    'bus' => [...],
+    'optLF'  => [100, 20, 1e-3, 1],
+    'optTA'  => [60, 0, 10, 0.01],  // fbase (Hz), tstart, tstop, step (s)
+    'bus'    => [...],
     'branch' => [...],
-    'gen' => [...],
-    'exc' => [...],
-    'event' => [...]
+    'gen'    => [...],
+    'exc'    => [...],
+    'event'  => [...],
 ];
 
-// Instanciar e executar
 $ta = new TransientAnalysis($data);
 $ta->run();
 
-// Obter resultados da simulação
 $results = $ta->getData();
 ```
 
-## Estrutura do Pacote
+---
 
-- `src/Tools/`: Ferramentas principais (`LoadFlow`, `TransientAnalysis`).
-- `src/Models/`: Modelos de componentes dinâmicos (Geradores, Excitadores, Governadores).
-- `src/Math/`: Utilitários matemáticos (Matrizes Esparsas, Números Complexos, Álgebra Linear).
+## Package Structure
 
-## Licença
+```
+src/
+├── File.php                  # JSON data file reader
+├── Math/
+│   ├── AbstractMatrix.php
+│   ├── Angle.php
+│   ├── Complex.php           # Complex number arithmetic
+│   ├── LinAlg.php            # Gaussian elimination and LU decomposition
+│   ├── Matrix.php            # Dense matrix operations
+│   └── Sparse.php            # Sparse matrix (compressed column)
+├── Models/
+│   ├── AbstractModel.php     # Base class for dynamic equipment models
+│   ├── Exc/
+│   │   ├── Exc1.php          # IEEE Type I exciter
+│   │   └── Exc2.php          # Simplified IEEE ST1 exciter
+│   └── Gen/
+│       ├── Gen1.php          # Classical synchronous generator
+│       └── Gen2.php          # 4th-order synchronous generator
+└── Tools/
+    ├── AbstractTools.php     # Base class for solver tools
+    ├── LoadFlow.php          # Newton-Raphson load flow solver
+    └── TransientAnalysis.php # Trapezoidal transient stability solver
+```
 
-Este projeto é licenciado sob a GPL-2.0-or-later. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v2.0 or later**. See the [LICENSE](LICENSE) file for details.
