@@ -399,8 +399,8 @@ examples/
 ├── example_loadflow_9bus.php      # Load flow example (inline data)
 ├── example_loadflow_57bus.php     # Load flow example (JSON file)
 ├── example_loadflow_118bus.php    # Load flow example (JSON file)
-├── example_math.php
-└── example_stability_9bus.php     # Transient stability example
+├── example_stability_9bus.php     # Transient stability example
+└── example_math.php
 
 ```
 
