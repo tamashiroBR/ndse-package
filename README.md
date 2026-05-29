@@ -1,10 +1,10 @@
-# NDSE package
+# NDSE Tools for Electrical Power System
 
 [![Latest Stable Version](https://poser.pugx.org/tamashiro/ndse/v/stable)](https://packagist.org/packages/tamashiro/ndse)
 [![License](https://poser.pugx.org/tamashiro/ndse/license)](https://packagist.org/packages/tamashiro/ndse)
 [![PHP Version Require](https://poser.pugx.org/tamashiro/ndse/require/php)](https://packagist.org/packages/tamashiro/ndse)
 
-**NDSE package** is a PHP library for electrical power system simulation. It provides a steady-state **Load Flow** solver and a time-domain **Transient Stability Analysis** engine, both built on top of native PHP sparse matrix and complex number math utilities.
+**NDSE Tools** is a PHP library for electrical power system simulation. It provides a steady-state **Load Flow** solver and a time-domain **Transient Stability Analysis** engine, both built on top of native PHP sparse matrix and complex number math utilities.
 
 This PHP package was developed as part of the doctoral thesis defended at the Federal University of Uberlândia, Faculty of Electrical Engineering. The full thesis document is available at the university repository: https://repositorio.ufu.br/handle/123456789/18396.
 
